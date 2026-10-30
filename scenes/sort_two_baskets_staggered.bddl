@@ -1,0 +1,126 @@
+; ======================================================================
+; sort_two_baskets_staggered : sort_two_baskets の食品を 6 列(y が全て異なる)の千鳥配置にした版
+;   「一番左」「左から2番目」のような位置の指示を曖昧さなく評価するため。元のシーンは同じ列に2個ずつ並び、
+;   隣の物体との y の差が 0〜1cm しかなく「一番左」が決まらなかった。
+;
+; 座標: ここに書く数値は「テーブル(床)の中心を原点」としたワールド座標 [m]。
+;   +x = ロボットから見て前方 / カメラ(agentview)に近づく方向
+;   +y = 画像の右方向 (agentview の画像で右)
+;   ロボットの土台は x = -0.6 にある。手が安全に届くのは x <= 約 +0.2 まで。
+; 「左のかご / 右のかご」は agentview の画像上での左右で定義する:
+;   basket_1 = 左(画像の左, y<0) / basket_2 = 右(画像の右, y>0)
+; regions の :ranges は (x_min y_min x_max y_max)。この矩形の中にリセットのたび
+; ランダムに置かれる。矩形を広げれば配置の揺れが増え、狭めれば固定に近づく。
+; ======================================================================
+(define (problem LIBERO_Floor_Manipulation)
+  (:domain robosuite)
+  (:language Sort the items into the left and right baskets)
+    (:regions
+      ; ---- かご (狭い矩形 = ほぼ固定位置) ----
+      (left_basket_region
+          (:target floor)
+          (:ranges (
+              (-0.01 -0.29 0.01 -0.27)
+            )
+          )
+      )
+      (right_basket_region
+          (:target floor)
+          (:ranges (
+              (-0.01 0.27 0.01 0.29)
+            )
+          )
+      )
+
+      ; ---- 奥の列 (x = -0.15, ロボット側): 背の高い物 (列: 左から 1, 3, 5 番目) ----
+      (milk_region
+          (:target floor)
+          (:ranges (
+              (-0.175 -0.150 -0.125 -0.100)
+            )
+          )
+      )
+      (orange_juice_region
+          (:target floor)
+          (:ranges (
+              (-0.175 -0.050 -0.125 0.000)
+            )
+          )
+      )
+      (ketchup_region
+          (:target floor)
+          (:ranges (
+              (-0.175 0.050 -0.125 0.100)
+            )
+          )
+      )
+
+      ; ---- 手前の列 (x = +0.05, カメラ側): 背の低い物 (列: 左から 2, 4, 6 番目) ----
+      (bbq_sauce_region
+          (:target floor)
+          (:ranges (
+              (0.025 -0.100 0.075 -0.050)
+            )
+          )
+      )
+      (tomato_sauce_region
+          (:target floor)
+          (:ranges (
+              (0.025 0.000 0.075 0.050)
+            )
+          )
+      )
+      (cream_cheese_region
+          (:target floor)
+          (:ranges (
+              (0.025 0.100 0.075 0.150)
+            )
+          )
+      )
+
+      ; ---- 「かごの中」の判定領域 ----
+      (contain_region
+          (:target basket_1)
+      )
+      (contain_region
+          (:target basket_2)
+      )
+    )
+
+  (:fixtures
+    floor - floor
+  )
+
+  (:objects
+    basket_1 basket_2 - basket
+    milk_1 - milk
+    orange_juice_1 - orange_juice
+    ketchup_1 - ketchup
+    bbq_sauce_1 - bbq_sauce
+    tomato_sauce_1 - tomato_sauce
+    cream_cheese_1 - cream_cheese
+  )
+
+  ; LIBERO の仕様上必須。このパイプラインでは使わない(指示ごとに目標が変わるため、成否は自前のコードで判定する)
+  (:obj_of_interest
+    ketchup_1
+    basket_2
+  )
+
+  (:init
+    (On basket_1 floor_left_basket_region)
+    (On basket_2 floor_right_basket_region)
+    (On milk_1 floor_milk_region)
+    (On orange_juice_1 floor_orange_juice_region)
+    (On ketchup_1 floor_ketchup_region)
+    (On bbq_sauce_1 floor_bbq_sauce_region)
+    (On tomato_sauce_1 floor_tomato_sauce_region)
+    (On cream_cheese_1 floor_cream_cheese_region)
+  )
+
+  ; LIBERO の仕様上必須(ダミー)。
+  (:goal
+    (And (In ketchup_1 basket_2_contain_region))
+  )
+
+)

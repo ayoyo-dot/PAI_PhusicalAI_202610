@@ -1,0 +1,109 @@
+; ======================================================================
+; sort_one_basket : かご 1 個 + 食品 6 個(千鳥配置: 食品の y が全て異なる 6 列)。
+;   ユースケース「指定した物体をかごに入れる」用。sort_two_baskets_staggered から左のかごを除いたもの。
+;
+; 座標: テーブル(床)の中心を原点としたワールド座標 [m]。+x = カメラ側 / +y = 画像の右。ロボットの土台は x = -0.6。
+; かご: basket_1 は画像の右(y = +0.28)。食品: 奥の列(x = -0.15)に milk, orange_juice, ketchup、手前の列(x = +0.05)に
+;   bbq_sauce, tomato_sauce, cream_cheese。
+; :goal / :obj_of_interest は LIBERO の仕様上必須のダミー(成否はこのプロジェクトのコードで判定する)。
+; ======================================================================
+(define (problem LIBERO_Floor_Manipulation)
+  (:domain robosuite)
+  (:language Sort the items into the left and right baskets)
+    (:regions
+      (basket_region
+          (:target floor)
+          (:ranges (
+              (-0.01 0.27 0.01 0.29)
+            )
+          )
+      )
+
+      ; ---- 奥の列 (x = -0.15, ロボット側): 背の高い物 (列: 左から 1, 3, 5 番目) ----
+      (milk_region
+          (:target floor)
+          (:ranges (
+              (-0.175 -0.150 -0.125 -0.100)
+            )
+          )
+      )
+      (orange_juice_region
+          (:target floor)
+          (:ranges (
+              (-0.175 -0.050 -0.125 0.000)
+            )
+          )
+      )
+      (ketchup_region
+          (:target floor)
+          (:ranges (
+              (-0.175 0.050 -0.125 0.100)
+            )
+          )
+      )
+
+      ; ---- 手前の列 (x = +0.05, カメラ側): 背の低い物 (列: 左から 2, 4, 6 番目) ----
+      (bbq_sauce_region
+          (:target floor)
+          (:ranges (
+              (0.025 -0.100 0.075 -0.050)
+            )
+          )
+      )
+      (tomato_sauce_region
+          (:target floor)
+          (:ranges (
+              (0.025 0.000 0.075 0.050)
+            )
+          )
+      )
+      (cream_cheese_region
+          (:target floor)
+          (:ranges (
+              (0.025 0.100 0.075 0.150)
+            )
+          )
+      )
+
+      ; ---- 「かごの中」の判定領域 ----
+      (contain_region
+          (:target basket_1)
+      )
+    )
+
+  (:fixtures
+    floor - floor
+  )
+
+  (:objects
+    basket_1 - basket
+    milk_1 - milk
+    orange_juice_1 - orange_juice
+    ketchup_1 - ketchup
+    bbq_sauce_1 - bbq_sauce
+    tomato_sauce_1 - tomato_sauce
+    cream_cheese_1 - cream_cheese
+  )
+
+  ; LIBERO の仕様上必須。このパイプラインでは使わない(指示ごとに目標が変わるため、成否は自前のコードで判定する)
+  (:obj_of_interest
+    ketchup_1
+    basket_1
+  )
+
+  (:init
+    (On basket_1 floor_basket_region)
+    (On milk_1 floor_milk_region)
+    (On orange_juice_1 floor_orange_juice_region)
+    (On ketchup_1 floor_ketchup_region)
+    (On bbq_sauce_1 floor_bbq_sauce_region)
+    (On tomato_sauce_1 floor_tomato_sauce_region)
+    (On cream_cheese_1 floor_cream_cheese_region)
+  )
+
+  ; LIBERO の仕様上必須(ダミー)。
+  (:goal
+    (And (In ketchup_1 basket_1_contain_region))
+  )
+
+)

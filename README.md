@@ -15,8 +15,9 @@ source/        　自分で実装した部分。
   handoff.py      切り替え判定と、ポリシーを動かすループ
   provided.py     環境の部品(AI 作): 場面の作成、手先の位置・向き、物体の表(把持の高さ・幅)
   eval_policy.py  評価の道具(AI 作): 成功率、Wilson 区間、切り替え判定の TP/FP/FN/TN、動画
-  *.sh            実行スクリプト(下の「動かし方」)
-src/libero_ros/ 環境まわりの部品(AI 作): 手先の制御と座標(control)、つかみ(grasp)、配置(layout)、デモの記録(demos)、動画(video)
+
+# 以下はAIが構築
+src/libero_ros/ 環境まわりの部品: 手先の制御と座標(control)、つかみ(grasp)、配置(layout)、デモの記録(demos)、動画(video)
 scripts/        policy_server.py: 学習した ACT を HTTP で呼べるようにするサーバー
 docker/         イメージの定義(sim = LIBERO 入り、policy = lerobot 入り)
 scenes/         シーン定義(.bddl)
